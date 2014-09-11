@@ -1,5 +1,6 @@
 *.coverage
 .ant_targets
+source-formatter.properties
 classes/
 coverage/
 test-classes/
