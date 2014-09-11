@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+
+<project name="compilers" xmlns:antelope="antlib:ise.antelope.tasks">
+	<property name="project.dir" value="." />
+	<property environment="env" />
+
+	<!-- configuration file -->
+
+	<property file="${project.dir}/build.properties" />
+
+	<path id="lib.classpath">
+		<fileset dir="${project.dir}/lib" includes="*.jar" />
+	</path>
+
+	<path id="project.classpath">
+		<path refid="lib.classpath" />
+		<pathelement path="${project.dir}/classes" />
+	</path>
+
+	<taskdef classpathref="lib.classpath" resource="net/sf/antcontrib/antlib.xml" />
+
+	<target name="clean">
+		<delete dir="${project.dir}/classes" />
+		<delete dir="${project.dir}/test-classes" />
+	</target>
+
+	<target name="compile" depends="clean">
+		<mkdir dir="${project.dir}/classes" />
+
+		<javac
+			classpathref="project.classpath"
+			compiler="${javac.compiler}"
+			debug="${javac.debug}"
+			deprecation="${javac.deprecation}"
+			destdir="${project.dir}/classes"
+			includeAntRuntime="false"
+			nowarn="${javac.nowarn}"
+			srcdir="${project.dir}/src"
+		/>
+	</target>
+
+	<target name="compile-test" depends="compile">
+		<mkdir dir="${project.dir}/test-classes" />
+
+		<javac
+			classpathref="project.classpath"
+			compiler="${javac.compiler}"
+			debug="${javac.debug}"
+			deprecation="${javac.deprecation}"
+			destdir="${project.dir}/test-classes"
+			includeAntRuntime="false"
+			nowarn="${javac.nowarn}"
+			srcdir="${project.dir}/test"
+		/>
+	</target>
+
+	<target name="test-code" depends="compile-test">
+		<junit fork="false" printsummary="yes" haltonfailure="yes">
+			<classpath>
+				<path refid="project.classpath" />
+				<pathelement location="${project.dir}/test-classes" />
+			</classpath>
+
+			<batchtest>
+				<formatter type="plain" usefile="false" />
+
+				<fileset dir="${project.dir}/test-classes">
+					<include name="**/*Test.class" />
+				</fileset>
+			</batchtest>
+		</junit>
+	</target>
+
+	<target name="test-grammar">
+		<mkdir dir="${project.dir}/_antlr" />
+
+		<trycatch>
+			<try>
+				<java
+					classpathref="project.classpath"
+					failonerror="true"
+					fork="true"
+					jar="${project.dir}/lib/antlr-4.4-complete.jar"
+					maxmemory="256m"
+					newenvironment="true"
+				>
+					<arg value="-o" />
+					<arg value="${project.dir}/_antlr" />
+					<arg value="${project.dir}/${grammar.file}" />
+				</java>
+			</try>
+			<finally>
+				<delete dir="${project.dir}/_antlr" />
+			</finally>
+		</trycatch>
+	</target>
+
+	<target name="test" depends="test-grammar,test-code" />
+</project>
