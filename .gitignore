@@ -1,3 +1,5 @@
+*.coverage
 .ant_targets
 classes/
+coverage/
 test-classes/
