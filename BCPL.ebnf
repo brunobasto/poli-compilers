@@ -2,120 +2,120 @@ grammar BCPL;
 
 // Identifiers, Strings and Numbers
 
-Letter								: 'A'..'Z';
+Letter                              : 'A'..'Z';
 
-Digit								: '0'..'9';
+Digit                               : '0'..'9';
 
-Space								: ' ' | '\t' | '\r' | '\n';
+Space                               : ' ' | '\t' | '\r' | '\n';
 
-number								: (Digit)+;
+number                              : (Digit)+;
 
-identifier							: Letter (Letter | Digit)*;
+identifier                          : Letter (Letter | Digit)*;
 
-stringConstant						:  '"' (Letter | Digit | Space)* '"';
+stringConstant                      :  '"' (Letter | Digit | Space)* '"';
 
 // Operators
 
-MultiplicationOperator				: '*' | '/';
+MultiplicationOperator              : '*' | '/';
 
-AddOperator							: '+' | '-';
+AddOperator                         : '+' | '-';
 
-ComparationOperator					: '=' | '~=' | '<=' | '>=' | '<' | '>';
+ComparationOperator                 : '=' | '~=' | '<=' | '>=' | '<' | '>';
 
-AndOperator							: '&';
+AndOperator                         : '&';
 
-OrOperator							: '|';
+OrOperator                          : '|';
 
-EquivalenceOperator					: 'EQV' | 'NEQV';
+EquivalenceOperator                 : 'EQV' | 'NEQV';
 
-NotOperator							: '~';
+NotOperator                         : '~';
 
 // Expressions
 
-element								: stringConstant | number | identifier | 'TRUE' | 'FALSE';
+element                             : stringConstant | number | identifier | 'TRUE' | 'FALSE';
 
-primaryExpression					: primaryExpression '(' expressionList ')' | primaryExpression '(' ')' | '(' expression ')' | element;
+primaryExpression                   : primaryExpression '(' expressionList ')' | primaryExpression '(' ')' | '(' expression ')' | element;
 
-multiplicationExpression			: multiplicationExpression MultiplicationOperator primaryExpression | primaryExpression;
+multiplicationExpression            : multiplicationExpression MultiplicationOperator primaryExpression | primaryExpression;
 
-addExpression						: addExpression AddOperator multiplicationExpression | AddOperator multiplicationExpression | multiplicationExpression;
+addExpression                       : addExpression AddOperator multiplicationExpression | AddOperator multiplicationExpression | multiplicationExpression;
 
-relExpression						: addExpression (ComparationOperator addExpression)?;
+relExpression                       : addExpression (ComparationOperator addExpression)?;
 
-notExpression						: NotOperator relExpression | relExpression;
+notExpression                       : NotOperator relExpression | relExpression;
 
-andExpression						: notExpression (AndOperator notExpression)*;
+andExpression                       : notExpression (AndOperator notExpression)*;
 
-orExpression						: andExpression (OrOperator andExpression)*;
+orExpression                        : andExpression (OrOperator andExpression)*;
 
-equivalenceExpression				: orExpression (EquivalenceOperator orExpression)*;
+equivalenceExpression               : orExpression (EquivalenceOperator orExpression)*;
 
-conditionalExpression				: equivalenceExpression '->' conditionalExpression ',' conditionalExpression | equivalenceExpression;
+conditionalExpression               : equivalenceExpression '->' conditionalExpression ',' conditionalExpression | equivalenceExpression;
 
-expression							: conditionalExpression | 'VALOF' command;
+expression                          : conditionalExpression | 'VALOF' command;
 
-expressionList						: expression (',' expression)*;
+expressionList                      : expression (',' expression)*;
 
 // Constant Expressions
 
-constantElementExpression			: number | identifier | 'TRUE' | 'FALSE';
+constantElementExpression           : number | identifier | 'TRUE' | 'FALSE';
 
-constantMultiplicationExpression	: constantMultiplicationExpression MultiplicationOperator constantElementExpression | constantElementExpression;
+constantMultiplicationExpression    : constantMultiplicationExpression MultiplicationOperator constantElementExpression | constantElementExpression;
 
-constantAddExpression				: constantAddExpression AddOperator constantMultiplicationExpression | AddOperator constantMultiplicationExpression | constantMultiplicationExpression;
+constantAddExpression               : constantAddExpression AddOperator constantMultiplicationExpression | AddOperator constantMultiplicationExpression | constantMultiplicationExpression;
 
-constantAndExpression				: constantAndExpression AndOperator constantAddExpression | constantAddExpression;
+constantAndExpression               : constantAndExpression AndOperator constantAddExpression | constantAddExpression;
 
-constantExpression					: constantExpression OrOperator constantAndExpression | constantAndExpression;
+constantExpression                  : constantExpression OrOperator constantAndExpression | constantAndExpression;
 
 // Declarations
 
-identifierList						: identifier (',' identifier)*;
+identifierList                      : identifier (',' identifier)*;
 
-functionDefinition					: identifier '(' identifierList ')' '=' expression | identifier '(' ')' '=' expression;
+functionDefinition                  : identifier '(' identifierList ')' '=' expression | identifier '(' ')' '=' expression;
 
-routineDefinition					: identifier '(' identifierList ')' 'BE' command | identifier '(' ')' 'BE' command;
+routineDefinition                   : identifier '(' identifierList ')' 'BE' command | identifier '(' ')' 'BE' command;
 
-variableDefinition					: identifierList '=' expressionList;
+variableDefinition                  : identifierList '=' expressionList;
 
-definition							: functionDefinition | routineDefinition | variableDefinition;
+definition                          : functionDefinition | routineDefinition | variableDefinition;
 
-declaration							: 'LET' definition ('AND' definition)*;
+declaration                         : 'LET' definition ('AND' definition)*;
 
-declarationList						: declaration (';' declaration)*;
+declarationList                     : declaration (';' declaration)*;
 
 // LHS Expressions
 
-leftHandSideExpression				: identifier | '!' primaryExpression;
+leftHandSideExpression              : identifier | '!' primaryExpression;
 
-leftHandSideList					: leftHandSideExpression (',' leftHandSideExpression)*;
+leftHandSideList                    : leftHandSideExpression (',' leftHandSideExpression)*;
 
 // Commands
 
-assignment							: leftHandSideList ':=' expressionList;
+assignment                          : leftHandSideList ':=' expressionList;
 
-simpleCommand						: 'BREAK' | 'LOOP' | 'RETURN';
+simpleCommand                       : 'BREAK' | 'LOOP' | 'RETURN';
 
-routineCommand						: primaryExpression '(' expressionList ')' | primaryExpression '(' ')';
+routineCommand                      : primaryExpression '(' expressionList ')' | primaryExpression '(' ')';
 
-resultsCommand						: 'RESULTIS' expression;
+resultsCommand                      : 'RESULTIS' expression;
 
-whileCommand						: 'WHILE' expression 'DO' expression;
+whileCommand                        : 'WHILE' expression 'DO' expression;
 
-ifCommand							: 'IF' expression 'THEN' command;
+ifCommand                           : 'IF' expression 'THEN' command;
 
-unlessCommand						: 'UNLESS' expression 'THEN' command;
+unlessCommand                       : 'UNLESS' expression 'THEN' command;
 
-conditionalCommand					: ifCommand (unlessCommand)?;
+conditionalCommand                  : ifCommand (unlessCommand)?;
 
-command								: assignment | resultsCommand | routineCommand | whileCommand | conditionalCommand;
+command                             : assignment | resultsCommand | routineCommand | whileCommand | conditionalCommand;
 
-commandList							: command (';' command)*;
+commandList                         : command (';' command)*;
 
 // Blocks and Compound Statements
 
-block								: '$(' declarationList ';' commandList '$)';
+block                               : '$(' declarationList ';' commandList '$)';
 
-compoundCommand						: '$(' commandList '$)';
+compoundCommand                     : '$(' commandList '$)';
 
-program								: declarationList;
+program                             : declarationList;
