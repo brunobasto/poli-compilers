@@ -32,19 +32,19 @@ NotOperator                         : '~';
 
 primaryExpression                   : stringConstant | number | identifier | 'TRUE' | 'FALSE';
 
-multiplicationExpression            : primaryExpression MultiplicationOperator primaryExpression | primaryExpression | multiplicationExpression;
+multiplicationExpression            : primaryExpression MultiplicationOperator primaryExpression | primaryExpression;
 
-addExpression                       : multiplicationExpression AddOperator multiplicationExpression | multiplicationExpression | addExpression;
+addExpression                       : multiplicationExpression AddOperator multiplicationExpression | multiplicationExpression;
 
-comparationExpression               : addExpression ComparationOperator addExpression | addExpression | comparationExpression;
+comparationExpression               : addExpression ComparationOperator addExpression | addExpression;
 
-notExpression                       : NotOperator comparationExpression | comparationExpression | notExpression;
+notExpression                       : NotOperator comparationExpression | comparationExpression;
 
-andExpression                       : notExpression AndOperator notExpression | notExpression | andExpression;
+andExpression                       : notExpression AndOperator notExpression | notExpression;
 
-orExpression                        : andExpression OrOperator andExpression | andExpression | orExpression;
+orExpression                        : andExpression OrOperator andExpression | andExpression;
 
-expression                          : orExpression | 'VALOF' command;
+expression                          : (orExpression)+ | 'VALOF' command;
 
 expressionList                      : expression (',' expression)*;
 
