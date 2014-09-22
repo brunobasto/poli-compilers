@@ -20,53 +20,33 @@ MultiplicationOperator              : '*' | '/';
 
 AddOperator                         : '+' | '-';
 
-ComparationOperator                 : '=' | '~=' | '<=' | '>=' | '<' | '>';
+ComparationOperator                 : '==' | '~=' | '<=' | '>=' | '<' | '>';
 
 AndOperator                         : '&';
 
 OrOperator                          : '|';
 
-EquivalenceOperator                 : 'EQV' | 'NEQV';
-
 NotOperator                         : '~';
 
 // Expressions
 
-element                             : stringConstant | number | identifier | 'TRUE' | 'FALSE';
+primaryExpression                   : stringConstant | number | identifier | 'TRUE' | 'FALSE';
 
-primaryExpression                   : primaryExpression '(' expressionList ')' | primaryExpression '(' ')' | '(' expression ')' | element;
+multiplicationExpression            : primaryExpression MultiplicationOperator primaryExpression | primaryExpression | multiplicationExpression;
 
-multiplicationExpression            : multiplicationExpression MultiplicationOperator primaryExpression | primaryExpression;
+addExpression                       : multiplicationExpression AddOperator multiplicationExpression | multiplicationExpression | addExpression;
 
-addExpression                       : addExpression AddOperator multiplicationExpression | AddOperator multiplicationExpression | multiplicationExpression;
+comparationExpression               : addExpression ComparationOperator addExpression | addExpression | comparationExpression;
 
-relExpression                       : addExpression (ComparationOperator addExpression)?;
+notExpression                       : NotOperator comparationExpression | comparationExpression | notExpression;
 
-notExpression                       : NotOperator relExpression | relExpression;
+andExpression                       : notExpression AndOperator notExpression | notExpression | andExpression;
 
-andExpression                       : notExpression (AndOperator notExpression)*;
+orExpression                        : andExpression OrOperator andExpression | andExpression | orExpression;
 
-orExpression                        : andExpression (OrOperator andExpression)*;
-
-equivalenceExpression               : orExpression (EquivalenceOperator orExpression)*;
-
-conditionalExpression               : equivalenceExpression '->' conditionalExpression ',' conditionalExpression | equivalenceExpression;
-
-expression                          : conditionalExpression | 'VALOF' command;
+expression                          : orExpression | 'VALOF' command;
 
 expressionList                      : expression (',' expression)*;
-
-// Constant Expressions
-
-constantElementExpression           : number | identifier | 'TRUE' | 'FALSE';
-
-constantMultiplicationExpression    : constantMultiplicationExpression MultiplicationOperator constantElementExpression | constantElementExpression;
-
-constantAddExpression               : constantAddExpression AddOperator constantMultiplicationExpression | AddOperator constantMultiplicationExpression | constantMultiplicationExpression;
-
-constantAndExpression               : constantAndExpression AndOperator constantAddExpression | constantAddExpression;
-
-constantExpression                  : constantExpression OrOperator constantAndExpression | constantAndExpression;
 
 // Declarations
 
@@ -74,7 +54,7 @@ identifierList                      : identifier (',' identifier)*;
 
 functionDefinition                  : identifier '(' identifierList ')' '=' expression | identifier '(' ')' '=' expression;
 
-routineDefinition                   : identifier '(' identifierList ')' 'BE' command | identifier '(' ')' 'BE' command;
+routineDefinition                   : identifier '(' identifierList ')' 'BE' commandBlock | identifier '(' ')' 'BE' commandBlock;
 
 variableDefinition                  : identifierList '=' expressionList;
 
@@ -84,38 +64,30 @@ declaration                         : 'LET' definition ('AND' definition)*;
 
 declarationList                     : declaration (';' declaration)*;
 
-// LHS Expressions
-
-leftHandSideExpression              : identifier | '!' primaryExpression;
-
-leftHandSideList                    : leftHandSideExpression (',' leftHandSideExpression)*;
-
 // Commands
 
-assignment                          : leftHandSideList ':=' expressionList;
+assignment                          : identifierList ':=' expressionList;
 
 simpleCommand                       : 'BREAK' | 'LOOP' | 'RETURN';
 
-routineCommand                      : primaryExpression '(' expressionList ')' | primaryExpression '(' ')';
+routineCommand                      : identifier '(' expressionList ')' | identifier '(' ')';
 
-resultsCommand                      : 'RESULTIS' expression;
+resultisCommand                     : 'RESULTIS' expression;
 
-whileCommand                        : 'WHILE' expression 'DO' expression;
+whileCommand                        : 'WHILE' expression 'DO' commandBlock;
 
-ifCommand                           : 'IF' expression 'THEN' command;
+ifCommand                           : 'IF' expression 'THEN' commandBlock;
 
-unlessCommand                       : 'UNLESS' expression 'THEN' command;
+unlessCommand                       : 'UNLESS' expression 'THEN' commandBlock;
 
 conditionalCommand                  : ifCommand (unlessCommand)?;
 
-command                             : assignment | resultsCommand | routineCommand | whileCommand | conditionalCommand;
+command                             : assignment | resultisCommand | routineCommand | simpleCommand | whileCommand | conditionalCommand;
 
 commandList                         : command (';' command)*;
 
-// Blocks and Compound Statements
+commandBlock                        : '{' (declarationList ';')? commandList '}';
 
-block                               : '$(' declarationList ';' commandList '$)';
-
-compoundCommand                     : '$(' commandList '$)';
+// Program
 
 program                             : declarationList;
