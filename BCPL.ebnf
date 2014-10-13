@@ -2,42 +2,42 @@ grammar BCPL;
 
 // Gramática Léxica
 
-Blank                    :     'Space' | 'Tab' | 'Eol';
-Comment                  :     '//' (Graphic)* Eol;
-Digit                    :     [0-9];
-Eol                      :     '\n';
-Graphic                  :     Letter | Digit | Op_aritimetic | Op_relation | Space | Tab | '.' | ':' | ';' | ',' | '"' | '\'' | '~' | '(' | ')' | '!' | '#' | '_' | '$';
-Identifier               :     Letter (Letter | Number)*;
-Keyword                  :     'INT' | 'BOOL' | 'LET' | 'AND' | 'WHILE' | 'RESULTIS' | 'IF' | 'DO' | 'ELSE' | 'TRUE' | 'FALSE' | 'BREAK' | 'CONTINUE' | 'WRITEF' | 'GLOBAL';
-Letter                   :     [A-Z]| [a-z];
-Number                   :     Digit (Digit)*;
-Op_aritimetic            :     '+' | '-' | '*' | '/';
-Op_attr                  :     ':=' | '=';
-Op_relation              :     '<' | '<=' | '>' | '>=' | '==' | '!';
-Space                    :     '/ $/';
-StringConstant           :     '"' (Letter | Number | Tab | Space)* '"';
-Tab                      :     '\t';
-Token                    :     Identifier | Number | Op_relation | Op_aritimetic | Keyword | '(' | ')' | '{' | '}' | ',';
+Blank                    :    'Space' | 'Tab' | 'Eol';
+Comment                  :    '//' (Graphic)* Eol;
+Digit                    :    [0-9];
+Eol                      :    '\n';
+Graphic                  :    Letter | Digit | Op_aritimetic | Op_relation | Space | Tab | '.' | ':' | ';' | ',' | '"' | '\'' | '~' | '(' | ')' | '!' | '#' | '_' | '$';
+Identifier               :    Letter (Letter | Number)*;
+Keyword                  :    'INT' | 'BOOL' | 'LET' | 'AND' | 'WHILE' | 'RESULTIS' | 'IF' | 'DO' | 'ELSE' | 'TRUE' | 'FALSE' | 'BREAK' | 'CONTINUE' | 'WRITEF' | 'GLOBAL';
+Letter                   :    [A-Z]| [a-z];
+Number                   :    Digit (Digit)*;
+Op_aritimetic            :    '+' | '-' | '*' | '/';
+Op_attr                  :    ':=' | '=';
+Op_relation              :    '<' | '<=' | '>' | '>=' | '==' | '!';
+Space                    :    '/ $/';
+StringConstant           :    '"' (Letter | Number | Tab | Space)* '"';
+Tab                      :    '\t';
+Token                    :    Identifier | Number | Op_attr | Op_relation | Op_aritimetic | Keyword | '(' | ')' | '{' | '}' | ',';
 
 // Gramática Sintática;
 
-program                  :     declarationList;
+program                  :    declarationList;
 
-declarationList          :     'LET' definition ('AND' definition)*;
+declarationList          :    'LET' definition ('AND' definition)*;
 
-definition               :     functionDefinition
-                         |     procedureDefinition
-                         |     variableDefinition;
+definition               :    functionDefinition
+                         |    procedureDefinition
+                         |    variableDefinition;
 
-identifierList           :     Identifier (',' Identifier)*;
+identifierList           :    Identifier (',' Identifier)*;
 
-functionDefinition       :     Identifier '(' identifierList ')' '=' 'VALOF' functionBlock;
+functionDefinition       :    Identifier '(' identifierList? ')' '=' 'VALOF' functionBlock;
 
-functionBlock            :     '{' commandList resultisCommand '}';
+functionBlock            :    '{' commandList resultisCommand '}';
 
-procedureDefinition      :     Identifier '(' identifierList ')' 'BE' commandBlock;
+procedureDefinition      :    Identifier '(' identifierList ')' 'BE' commandBlock;
 
-variableDefinition       :     ('GLOBAL')? (intVariableDefinition | boolVariableDefinition);
+variableDefinition       :    ('GLOBAL')? (intVariableDefinition | boolVariableDefinition);
 
 intVariableDefinition    :    'INT' Identifier '=' numberExpression;
 
@@ -45,38 +45,38 @@ boolVariableDefinition   :    'BOOL' Identifier '=' booleanExpression;
 
 commandBlock             :    '{' commandList '}';
 
-commandList              :     command (';' command)*;
+commandList              :    command (';' command)*;
 
-command                  :     assignmentCommand
-                         |     resultisCommand
-                         |     whileCommand
-                         |     ifCommand
-                         |     breakCommand
-                         |     continueCommand
-                         |     printCommand
-                         |     functionCallCommand;
+command                  :    assignmentCommand
+                         |    resultisCommand
+                         |    whileCommand
+                         |    ifCommand
+                         |    breakCommand
+                         |    continueCommand
+                         |    printCommand
+                         |    functionCallCommand;
 
-functionCallCommand      :      Identifier '(' identifierList ')';
+functionCallCommand      :    Identifier '(' identifierList ')';
 
-ifCommand                :     'IF' '(' booleanExpression ')' commandBlock ('ELSE' commandBlock)?;
+ifCommand                :    'IF' '(' booleanExpression ')' commandBlock ('ELSE' commandBlock)?;
 
-whileCommand             :     'WHILE' '(' booleanExpression ')' commandBlock;
+whileCommand             :    'WHILE' '(' booleanExpression ')' commandBlock;
 
-resultisCommand          :     'RESULTIS' expression;
+resultisCommand          :    'RESULTIS' expression;
 
-assignmentCommand        :     Identifier ':=' expression;
+assignmentCommand        :    Identifier ':=' expression;
 
-breakCommand             :     'BREAK';
+breakCommand             :    'BREAK';
 
-continueCommand          :     'CONTINUE';
+continueCommand          :    'CONTINUE';
 
-printCommand             :     'WRITEF' '(' expression ')';
+printCommand             :    'WRITEF' '(' expression ')';
 
-primaryNumberExpression  :     Number
-                         |     Identifier;
+primaryNumberExpression  :    Number
+                         |    Identifier;
 
-divisionExpression       :     primaryNumberExpression '/' primaryNumberExpression
-                         |     primaryNumberExpression;
+divisionExpression       :    primaryNumberExpression '/' primaryNumberExpression
+                         |    primaryNumberExpression;
 
 multiplicationExpression :    divisionExpression '*' divisionExpression
                          |    divisionExpression;
@@ -87,7 +87,7 @@ subExpression            :    multiplicationExpression '-' multiplicationExpress
 numberExpression         :    subExpression '+' subExpression
                          |    subExpression;
 
-relationExpression       :     numberExpression Op_relation numberExpression;
+relationExpression       :    numberExpression Op_relation numberExpression;
 
 primaryBooleanExpression :    Identifier
                          |    'TRUE'
@@ -95,21 +95,21 @@ primaryBooleanExpression :    Identifier
 
 notExpression            :    '!' (primaryBooleanExpression | relationExpression);
 
-andExpression            :     notExpression '&&' notExpression
-                         |     notExpression;
+andExpression            :    notExpression '&&' notExpression
+                         |    notExpression;
 
-orExpression             :     andExpression '||' andExpression
-                         |     andExpression;
+orExpression             :    andExpression '||' andExpression
+                         |    andExpression;
 
-equalExpression          :     orExpression '==' orExpression
-                         |     orExpression;
+equalExpression          :    orExpression '==' orExpression
+                         |    orExpression;
 
-notEqualExpression       :     equalExpression '!=' equalExpression
-                         |     equalExpression;
+notEqualExpression       :    equalExpression '!=' equalExpression
+                         |    equalExpression;
 
-booleanExpression        :     notEqualExpression
-                         |     relationExpression;
+booleanExpression        :    notEqualExpression
+                         |    relationExpression;
 
-expression               :     booleanExpression
-                         |     numberExpression
-                         |     primaryBooleanExpression;
+expression               :    booleanExpression
+                         |    numberExpression
+                         |    primaryBooleanExpression;
