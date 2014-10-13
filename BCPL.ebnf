@@ -1,93 +1,115 @@
 grammar BCPL;
 
-// Identifiers, Strings and Numbers
+// Gramática Léxica
 
-Letter                              : 'A'..'Z';
+Blank                    :     'Space' | 'Tab' | 'Eol';
+Comment                  :     '/*' (Graphic)* '*/' Eol;
+Digit                    :     [0-9];
+Eol                      :     '\n';
+Graphic                  :     Letter | Digit | Op_aritimetic | Op_relation | Space | Tab | '.' | ':' | ';' | ',' | '"' | '\'' | '~' | '(' | ')' | '!' | '#' | '_' | '$';
+Identifier               :     Letter (Letter | Number)*;
+Keyword                  :     'INT' | 'BOOL' | 'LET' | 'AND' | 'WHILE' | 'RESULTIS' | 'IF' | 'DO' | 'ELSE' | 'TRUE' | 'FALSE' | 'BREAK' | 'CONTINUE' | 'WRITEF' | 'GLOBAL';
+Letter                   :     [A-Z]| [a-z];
+Number                   :     Digit (Digit)*;
+Op_aritimetic            :     '+' | '-' | '*' | '/';
+Op_attr                  :     ':=' | '=';
+Op_relation              :     '<' | '<=' | '>' | '>=' | '==' | '!';
+Space                    :     '/ $/';
+StringConstant           :     '"' (Letter | Number | Tab | Space)* '"';
+Tab                      :     '\t';
+Token                    :     Identifier | Number | Op_relation | Op_aritimetic | Keyword | '(' | ')' | '{' | '}' | ',';
 
-Digit                               : '0'..'9';
+// Gramática Sintática;
 
-Space                               : ' ' | '\t' | '\r' | '\n';
+program                  :     declarationList;
 
-number                              : (Digit)+;
+declarationList          :     'LET' definition ('AND' definition)*;
 
-identifier                          : Letter (Letter | Digit)*;
+definition               :     functionDefinition
+                         |     procedureDefinition
+                         |     variableDefinition;
 
-stringConstant                      :  '"' (Letter | Digit | Space)* '"';
+identifierList           :     Identifier (',' Identifier)*;
 
-// Operators
+functionDefinition       :     Identifier '(' identifierList ')' '=' 'VALOF' functionBlock;
 
-MultiplicationOperator              : '*' | '/';
+functionBlock            :     '{' commandList resultisCommand '}';
 
-AddOperator                         : '+' | '-';
+procedureDefinition      :     Identifier '(' identifierList ')' 'BE' commandBlock;
 
-ComparationOperator                 : '==' | '~=' | '<=' | '>=' | '<' | '>';
+variableDefinition       :     ('GLOBAL')? (intVariableDefinition | boolVariableDefinition);
 
-AndOperator                         : '&';
+intVariableDefinition    :    'INT' Identifier '=' numberExpression;
 
-OrOperator                          : '|';
+boolVariableDefinition   :    'BOOL' Identifier '=' booleanExpression;
 
-NotOperator                         : '~';
+commandBlock             :    '{' commandList '}';
 
-// Expressions
+commandList              :     command (';' command)*;
 
-primaryExpression                   : stringConstant | number | identifier | 'TRUE' | 'FALSE';
+command                  :     assignmentCommand
+                         |     resultisCommand
+                         |     whileCommand
+                         |     ifCommand
+                         |     breakCommand
+                         |     continueCommand
+                         |     printCommand
+                         |     functionCallCommand;
 
-multiplicationExpression            : primaryExpression MultiplicationOperator primaryExpression | primaryExpression;
+functionCallCommand      :      Identifier '(' identifierList ')';
 
-addExpression                       : multiplicationExpression AddOperator multiplicationExpression | multiplicationExpression;
+ifCommand                :     'IF' '(' booleanExpression ')' commandBlock ('ELSE' commandBlock)?;
 
-comparationExpression               : addExpression ComparationOperator addExpression | addExpression;
+whileCommand             :     'WHILE' '(' booleanExpression ')' commandBlock;
 
-notExpression                       : NotOperator comparationExpression | comparationExpression;
+resultisCommand          :     'RESULTIS' expression;
 
-andExpression                       : notExpression AndOperator notExpression | notExpression;
+assignmentCommand        :     Identifier ':=' expression;
 
-orExpression                        : andExpression OrOperator andExpression | andExpression;
+breakCommand             :     'BREAK';
 
-expression                          : (orExpression)+ | 'VALOF' command;
+continueCommand          :     'CONTINUE';
 
-expressionList                      : expression (',' expression)*;
+printCommand             :     'WRITEF' '(' expression ')';
 
-// Declarations
+primaryNumberExpression  :     Number
+                         |     Identifier;
 
-identifierList                      : identifier (',' identifier)*;
+divisionExpression       :     primaryNumberExpression '/' primaryNumberExpression
+                         |     primaryNumberExpression;
 
-functionDefinition                  : identifier '(' identifierList ')' '=' expression | identifier '(' ')' '=' expression;
+multiplicationExpression :    divisionExpression '*' divisionExpression
+                         |    divisionExpression;
 
-routineDefinition                   : identifier '(' identifierList ')' 'BE' commandBlock | identifier '(' ')' 'BE' commandBlock;
+subExpression            :    multiplicationExpression '-' multiplicationExpression
+                         |    multiplicationExpression;
 
-variableDefinition                  : identifierList '=' expressionList;
+numberExpression         :    subExpression '+' subExpression
+                         |    subExpression;
 
-definition                          : functionDefinition | routineDefinition | variableDefinition;
+relationExpression       :     numberExpression Op_relation numberExpression;
 
-declaration                         : 'LET' definition ('AND' definition)*;
+primaryBooleanExpression :    Identifier
+                         |    'TRUE'
+                         |    'FALSE';
 
-declarationList                     : declaration (';' declaration)*;
+notExpression            :    '!' (primaryBooleanExpression | relationExpression);
 
-// Commands
+andExpression            :     notExpression '&&' notExpression
+                         |     notExpression;
 
-assignmentCommand                   : identifierList ':=' expressionList;
+orExpression             :     andExpression '||' andExpression
+                         |     andExpression;
 
-simpleCommand                       : 'BREAK' | 'LOOP' | 'RETURN';
+equalExpression          :     orExpression '==' orExpression
+                         |     orExpression;
 
-routineCommand                      : identifier '(' expressionList ')' | identifier '(' ')';
+notEqualExpression       :     equalExpression '!=' equalExpression
+                         |     equalExpression;
 
-resultisCommand                     : 'RESULTIS' expression;
+booleanExpression        :     notEqualExpression
+                         |     relationExpression;
 
-whileCommand                        : 'WHILE' expression 'DO' commandBlock;
-
-ifCommand                           : 'IF' expression 'THEN' commandBlock;
-
-unlessCommand                       : 'UNLESS' expression 'THEN' commandBlock;
-
-conditionalCommand                  : ifCommand (unlessCommand)?;
-
-command                             : assignmentCommand | resultisCommand | routineCommand | simpleCommand | whileCommand | conditionalCommand;
-
-commandList                         : command (';' command)*;
-
-commandBlock                        : '{' (declarationList ';')? commandList '}';
-
-// Program
-
-program                             : declarationList;
+expression               :     booleanExpression
+                         |     numberExpression
+                         |     primaryBooleanExpression;
