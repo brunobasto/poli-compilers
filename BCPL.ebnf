@@ -3,7 +3,7 @@ grammar BCPL;
 // Gramática Léxica
 
 Blank                    :     'Space' | 'Tab' | 'Eol';
-Comment                  :     '/*' (Graphic)* '*/' Eol;
+Comment                  :     '//' (Graphic)* Eol;
 Digit                    :     [0-9];
 Eol                      :     '\n';
 Graphic                  :     Letter | Digit | Op_aritimetic | Op_relation | Space | Tab | '.' | ':' | ';' | ',' | '"' | '\'' | '~' | '(' | ')' | '!' | '#' | '_' | '$';
